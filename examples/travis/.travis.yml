@@ -1,0 +1,58 @@
+language: python
+python:
+  - "3.11"
+  - "3.12"
+os: linux
+dist: jammy
+
+env:
+  global:
+    - REGISTRY=ghcr.io/acme
+    - secure: "encrypted-blob=="
+  jobs:
+    - DB=postgres
+    - DB=sqlite
+
+services:
+  - postgresql
+  - redis
+
+cache: pip
+
+addons:
+  apt:
+    packages:
+      - libpq-dev
+
+git:
+  depth: false
+
+branches:
+  only:
+    - main
+    - /^release-.*$/
+
+before_install:
+  - pip install --upgrade pip
+install:
+  - pip install -r requirements.txt
+script:
+  - pytest -q
+after_failure:
+  - cat logs/test.log
+
+jobs:
+  include:
+    - python: "3.13"
+      env: EXPERIMENTAL=1
+  allow_failures:
+    - python: "3.13"
+
+deploy:
+  provider: pypi
+  username: __token__
+  on:
+    tags: true
+
+notifications:
+  email: false

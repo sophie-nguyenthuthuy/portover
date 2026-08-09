@@ -11,7 +11,8 @@ from pathlib import Path
 
 from portover.migrations import REGISTRY
 
-_LANG = {"pip-to-uv": ("text", "toml"), "jenkins-to-gha": ("groovy", "yaml"), "flake8-to-ruff": ("ini", "toml")}
+_LANG = {"pip-to-uv": ("text", "toml"), "jenkins-to-gha": ("groovy", "yaml"),
+         "travis-to-gha": ("yaml", "yaml"), "flake8-to-ruff": ("ini", "toml")}
 
 
 def mapping_page(migration, meta) -> str:

@@ -1,7 +1,7 @@
 [project]
 name = "portover"
-version = "0.1.0"
-description = "Migrate one config dialect to another, one directive at a time: pip->uv, Jenkins->GitHub Actions, flake8->ruff"
+version = "0.2.0"
+description = "Migrate one config dialect to another, one directive at a time: pip->uv, Jenkins->GitHub Actions, Travis->GitHub Actions, flake8->ruff"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
