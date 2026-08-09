@@ -70,6 +70,8 @@ def apply(key, value, job, ctx, report) -> None:
                           "the schedule itself lives in Drone's UI, not this file — add "
                           "`on: schedule: - cron: ...` with the right expression")
             continue
+        if event == "push":
+            ctx.plain_push = True
         existing = ctx.on.setdefault(name, {})
         for k, v in spec.items():
             existing.setdefault(k, v)

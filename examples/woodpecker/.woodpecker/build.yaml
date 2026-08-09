@@ -1,0 +1,45 @@
+when:
+  - event: push
+    branch: main
+  - event: tag
+
+matrix:
+  GO_VERSION:
+    - "1.21"
+    - "1.22"
+
+labels:
+  platform: linux/amd64
+
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    settings:
+      depth: 50
+
+services:
+  database:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=secret
+
+steps:
+  - name: build
+    image: golang:${GO_VERSION}
+    environment:
+      - GOOS=linux
+    commands:
+      - go build ./...
+      - echo "built $CI_COMMIT_SHA on $CI_COMMIT_BRANCH"
+
+  - name: test
+    image: golang:${GO_VERSION}
+    commands:
+      - go test ./...
+
+  - name: notify
+    image: alpine
+    when:
+      - status: [success, failure]
+    commands:
+      - ./notify.sh

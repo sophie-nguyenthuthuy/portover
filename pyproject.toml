@@ -1,13 +1,13 @@
 [project]
 name = "portover"
-version = "0.8.0"
-description = "Migrate one config dialect to another, one directive at a time: pip->uv, Jenkins/Travis/CircleCI/GitLab CI/Azure Pipelines/Bitbucket/Buildkite/Drone->GitHub Actions, flake8->ruff"
+version = "0.9.0"
+description = "Migrate one config dialect to another, one directive at a time: pip->uv, Jenkins/Travis/CircleCI/GitLab CI/Azure Pipelines/Bitbucket/Buildkite/Drone/Woodpecker->GitHub Actions, flake8->ruff"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Sophie Nguyen", email = "sophie.nguyenthuthuy@gmail.com" }]
 keywords = ["migration", "uv", "requirements.txt", "jenkins", "travis-ci", "circleci",
-            "gitlab-ci", "azure-pipelines", "bitbucket-pipelines", "buildkite", "drone-ci", "github-actions", "flake8", "ruff"]
+            "gitlab-ci", "azure-pipelines", "bitbucket-pipelines", "buildkite", "drone-ci", "woodpecker-ci", "github-actions", "flake8", "ruff"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

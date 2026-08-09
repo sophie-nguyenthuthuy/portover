@@ -1,0 +1,16 @@
+depends_on:
+  - build
+
+when:
+  - event: tag
+
+steps:
+  publish:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: acme/app
+      tags: latest
+      username:
+        from_secret: docker_user
+      password:
+        from_secret: docker_pass

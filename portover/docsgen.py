@@ -12,7 +12,7 @@ from pathlib import Path
 from portover.migrations import REGISTRY
 
 _LANG = {"pip-to-uv": ("text", "toml"), "jenkins-to-gha": ("groovy", "yaml"),
-         "travis-to-gha": ("yaml", "yaml"), "gitlab-ci-to-gha": ("yaml", "yaml"), "circleci-to-gha": ("yaml", "yaml"), "azure-pipelines-to-gha": ("yaml", "yaml"), "bitbucket-to-gha": ("yaml", "yaml"), "buildkite-to-gha": ("yaml", "yaml"), "drone-to-gha": ("yaml", "yaml"),
+         "travis-to-gha": ("yaml", "yaml"), "gitlab-ci-to-gha": ("yaml", "yaml"), "circleci-to-gha": ("yaml", "yaml"), "azure-pipelines-to-gha": ("yaml", "yaml"), "bitbucket-to-gha": ("yaml", "yaml"), "buildkite-to-gha": ("yaml", "yaml"), "drone-to-gha": ("yaml", "yaml"), "woodpecker-to-gha": ("yaml", "yaml"),
          "flake8-to-ruff": ("ini", "toml")}
 
 

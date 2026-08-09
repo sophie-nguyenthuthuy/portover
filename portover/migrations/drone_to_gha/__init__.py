@@ -47,6 +47,7 @@ class DroneContext:
     current_jid: str = ""
     secrets: set = field(default_factory=set)
     trigger_variants: list = field(default_factory=list)
+    plain_push: bool = False  # a push event was asked for, not only tags
     # per-step scratch, set by the steps mapping before each step's fields run
     step_image: str = ""
     step_shared_image: bool = True
@@ -170,12 +171,20 @@ class DroneToGha(Migration):
     def assemble(self, ctx: DroneContext, report: Report) -> dict:
         from portover.migrations.drone_to_gha.mappings import variables as variables_map
 
+        _fix_push_filters(ctx)
         workflow: dict = {"name": "CI", "on": ctx.on or {"push": {}, "pull_request": {}}}
         env = variables_map.compat_env(ctx, report)
         if env:
             workflow["env"] = env
         workflow["jobs"] = {jid: order_job(ctx.jobs[jid]) for jid in ctx.job_order}
         return workflow
+
+
+def _fix_push_filters(ctx) -> None:
+    """`on: push: tags:` alone means ONLY tags trigger — branch pushes stop building."""
+    push = ctx.on.get("push")
+    if ctx.plain_push and isinstance(push, dict) and push.get("tags") and not push.get("branches"):
+        push["branches"] = ["**"]
 
 
 def _checkout(job: dict) -> dict:
