@@ -1,9 +1,17 @@
 import tomllib
+from pathlib import Path
 
+from portover import __version__
 from portover.cli import main
 from portover.core import MappingMeta, load_mappings
 from portover.docsgen import generate
 from portover.migrations import REGISTRY
+
+
+def test_package_versions_match():
+    pyproject = Path(__file__).parent.parent / "pyproject.toml"
+    project_version = tomllib.loads(pyproject.read_text())["project"]["version"]
+    assert __version__ == project_version
 
 
 def test_every_mapping_has_complete_meta():
