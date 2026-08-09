@@ -1,0 +1,71 @@
+version: 2.1
+
+parameters:
+  deploy_env:
+    type: string
+    default: staging
+
+orbs:
+  node: circleci/node@5.2.0
+
+commands:
+  install:
+    steps:
+      - run: pip install -r requirements.txt
+
+executors:
+  python:
+    docker:
+      - image: cimg/python:3.12
+      - image: postgres:16
+        environment:
+          POSTGRES_PASSWORD: postgres
+
+jobs:
+  build:
+    executor: python
+    environment:
+      APP_ENV: test
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "requirements.txt" }}
+            - v1-deps-
+      - install
+      - run:
+          name: Run tests
+          command: pytest -q
+          no_output_timeout: 20m
+      - save_cache:
+          key: v1-deps-{{ checksum "requirements.txt" }}
+          paths:
+            - .venv
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+      - store_test_results:
+          path: test-results
+  deploy:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - attach_workspace:
+          at: .
+      - run: ./deploy << pipeline.parameters.deploy_env >>
+      - node/install-packages
+
+workflows:
+  build-test-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
+    triggers:
+      - schedule:
+          cron: "0 3 * * *"
