@@ -1,0 +1,14 @@
+"""Migration registry. Adding a migration = import its MIGRATION here."""
+
+from portover.migrations.flake8_to_ruff import MIGRATION as flake8_to_ruff
+from portover.migrations.jenkins_to_gha import MIGRATION as jenkins_to_gha
+from portover.migrations.pip_to_uv import MIGRATION as pip_to_uv
+
+REGISTRY = [pip_to_uv, jenkins_to_gha, flake8_to_ruff]
+
+
+def get(migration_id: str):
+    for m in REGISTRY:
+        if m.id == migration_id:
+            return m
+    raise KeyError(migration_id)

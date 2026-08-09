@@ -1,0 +1,61 @@
+pipeline {
+    agent { docker { image 'python:3.12' } }
+
+    environment {
+        REGISTRY = 'ghcr.io/acme'
+        API_TOKEN = credentials('api-token')
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    triggers {
+        cron('H 4 * * 1-5')
+    }
+
+    parameters {
+        string(name: 'ENV', defaultValue: 'staging', description: 'deploy target')
+        booleanParam(name: 'DRY_RUN', defaultValue: true)
+    }
+
+    tools {
+        jdk 'jdk17'
+        nodejs 'node20'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                checkout scm
+                sh 'make build'
+                echo 'build done'
+            }
+        }
+        stage('Test') {
+            parallel {
+                stage('unit') {
+                    steps { sh 'make unit' }
+                }
+                stage('lint') {
+                    steps { sh 'make lint' }
+                }
+            }
+        }
+        stage('Deploy') {
+            when { branch 'main' }
+            steps {
+                sh './deploy.sh'
+            }
+            post {
+                failure { sh './rollback.sh' }
+            }
+        }
+    }
+
+    post {
+        always  { junit 'reports/**/*.xml' }
+        failure { sh './notify.sh' }
+    }
+}
