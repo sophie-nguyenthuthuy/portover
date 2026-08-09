@@ -40,9 +40,13 @@ def print_report(report, write: bool, root: Path) -> None:
     manual_hits = [h for h in report.hits if h.manual]
     if manual_hits:
         print("\nManual steps:")
+        seen: dict = {}  # identical advice repeated per job is one instruction, not N
         for h in manual_hits:
-            print(f"  ! [{h.mapping_id}] {h.source}")
-            print(f"      {h.detail}")
+            seen[(h.mapping_id, h.source, h.detail)] = seen.get((h.mapping_id, h.source, h.detail), 0) + 1
+        for (mapping_id, source, detail), count in seen.items():
+            times = f" (x{count})" if count > 1 else ""
+            print(f"  ! [{mapping_id}] {source}{times}")
+            print(f"      {detail}")
     if report.unmapped:
         print("\nUnmapped (no mapping claims these — contribute one!):")
         for u in report.unmapped:

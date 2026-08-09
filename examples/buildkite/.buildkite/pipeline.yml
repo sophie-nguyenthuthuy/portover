@@ -1,0 +1,51 @@
+env:
+  BUILD_MODE: release
+
+agents:
+  queue: builders
+
+steps:
+  - label: ":hammer: Build"
+    key: build
+    command: make build
+    artifact_paths:
+      - dist/**
+    plugins:
+      - docker#v5.10.0:
+          image: python:3.12
+
+  - wait
+
+  - label: ":test_tube: Unit"
+    key: unit
+    parallelism: 4
+    command: pytest -q --shard $BUILDKITE_PARALLEL_JOB
+    timeout_in_minutes: 20
+
+  - label: ":lint: Lint"
+    command: ruff check .
+    soft_fail: true
+
+  - label: ":package: Matrix build"
+    matrix:
+      setup:
+        os: [linux, macos]
+        version: ["3.11", "3.12"]
+    command: make check OS={{matrix.os}} V={{matrix.version}}
+
+  - wait
+
+  - block: ":rocket: Release?"
+    key: gate
+    prompt: Ship to production?
+
+  - label: ":ship: Deploy"
+    depends_on: gate
+    if: build.branch == "main" && build.tag == null
+    concurrency: 1
+    concurrency_group: deploy
+    command:
+      - echo "deploying $BUILDKITE_COMMIT"
+      - ./deploy.sh
+    agents:
+      queue: deployers

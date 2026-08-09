@@ -21,7 +21,9 @@ class MiniYamlError(ValueError):
     pass
 
 
-_KEY = re.compile(r"^([A-Za-z0-9_.\-/*\"' ]+):(\s+.*|)$")
+# Keys may carry version/vendor punctuation: Buildkite plugins are `org/name#v1.2.3`.
+# `#` is safe here because comments are stripped before a line is matched.
+_KEY = re.compile(r"^([A-Za-z0-9_.\-/*\"'#@+ ]+):(\s+.*|)$")
 _BLOCK_HEADER = re.compile(r"^(.*?):\s*([|>])([-+]?)\d*\s*$")
 
 
