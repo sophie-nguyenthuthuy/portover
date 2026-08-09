@@ -15,7 +15,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pip install pytest
+      # pyyaml is TEST-ONLY: the tests validate portover's hand-rolled YAML
+      # emitter against a real parser. portover itself has zero dependencies.
+      - run: pip install pytest pyyaml
       - run: python -m pytest tests/ -q
       - name: docs are up to date
         run: |

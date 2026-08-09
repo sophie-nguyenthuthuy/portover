@@ -38,7 +38,9 @@ def apply(stmt, steps, ctx, report):   # convert it — or flag it
 
 3. Add a test next to the others in `tests/` (input snippet in, expected output
    or manual flag out).
-4. `python -m pytest` and `python -m portover.cli docs` — your doc page in
+4. `pip install pytest pyyaml` (pyyaml is test-only — the tests check the
+   generated YAML with a real parser; portover itself has zero dependencies),
+   then `python -m pytest` and `python -m portover.cli docs` — your doc page in
    `docs/` is generated from `META`, no docs to write.
 
 Rules of the house:
