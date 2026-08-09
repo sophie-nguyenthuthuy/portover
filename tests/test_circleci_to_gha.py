@@ -186,3 +186,33 @@ def test_anchor_is_reported(tmp_path):
     report = run_file(tmp_path, "defaults: &defaults\n  docker: []\n")
     assert not report.outputs
     assert any(h.mapping_id == "parse" and h.manual for h in report.hits)
+
+
+def test_job_keys_ordered_wiring_before_body(tmp_path):
+    report = run_file(tmp_path, EXAMPLE.read_text())
+    yml = report.outputs[".github/workflows/build-test-deploy.yml"]
+    deploy = yml.split("  deploy:\n")[1]
+    # needs/if must precede runs-on and steps, the way a human writes a job
+    assert deploy.index("needs:") < deploy.index("runs-on:") < deploy.index("steps:")
+    assert deploy.index("if:") < deploy.index("steps:")
+
+
+def test_single_filter_has_no_redundant_parens(tmp_path):
+    report = run_file(tmp_path,
+                      "version: 2.1\njobs:\n  build:\n    docker:\n      - image: cimg/base:2024.01\n"
+                      "    steps:\n      - run: make\n"
+                      "workflows:\n  main:\n    jobs:\n      - build:\n          filters:\n"
+                      "            branches:\n              only: main\n")
+    yml = report.outputs[".github/workflows/main.yml"]
+    assert "if: github.ref == 'refs/heads/main'" in yml
+    assert "((" not in yml
+
+
+def test_multiple_branch_filters_are_grouped(tmp_path):
+    report = run_file(tmp_path,
+                      "version: 2.1\njobs:\n  build:\n    docker:\n      - image: cimg/base:2024.01\n"
+                      "    steps:\n      - run: make\n"
+                      "workflows:\n  main:\n    jobs:\n      - build:\n          filters:\n"
+                      "            branches:\n              only: [main, develop]\n")
+    yml = report.outputs[".github/workflows/main.yml"]
+    assert "(github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')" in yml

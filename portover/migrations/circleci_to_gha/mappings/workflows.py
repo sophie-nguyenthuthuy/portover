@@ -84,10 +84,27 @@ def _ref_cond(kind: str, spec, report) -> list:
             by_mode[mode].append(f"!({cond})" if neg else cond)
     groups = []
     if by_mode["only"]:
-        groups.append("(" + " || ".join(by_mode["only"]) + ")")
+        groups.append(_group(by_mode["only"], " || "))
     if by_mode["ignore"]:
-        groups.append("(" + " && ".join(by_mode["ignore"]) + ")")
+        groups.append(_group(by_mode["ignore"], " && "))
     return [" && ".join(groups)] if groups else []
+
+
+def _group(conds: list, joiner: str) -> str:
+    """Join conditions, parenthesizing only when the grouping actually matters."""
+    return conds[0] if len(conds) == 1 else "(" + joiner.join(conds) + ")"
+
+
+# Canonical GHA job key order — generated workflows should read like hand-written
+# ones, with the wiring (needs/if) above the body (steps).
+_JOB_ORDER = ["name", "needs", "if", "runs-on", "environment", "permissions", "container",
+              "services", "strategy", "env", "defaults", "timeout-minutes", "continue-on-error", "steps"]
+
+
+def order_job(job: dict) -> dict:
+    ranked = sorted(job.items(), key=lambda kv: (_JOB_ORDER.index(kv[0]) if kv[0] in _JOB_ORDER
+                                                 else len(_JOB_ORDER), kv[0]))
+    return dict(ranked)
 
 
 def _job_entry(entry, ctx, report):
@@ -151,7 +168,7 @@ def apply(key, value, ctx, report) -> None:
                         filter_groups.extend(_ref_cond(kind, filters[kind], report))
                         tag_filtered = tag_filtered or kind == "tags"
                 if filter_groups:
-                    conds.append("(" + " || ".join(filter_groups) + ")")
+                    conds.append(_group(filter_groups, " || "))
             matrix = (opts.get("matrix") or {}).get("parameters") if isinstance(opts.get("matrix"), dict) else None
             if isinstance(matrix, dict) and matrix:
                 target = job.setdefault("strategy", {}).setdefault("matrix", {})
@@ -162,7 +179,7 @@ def apply(key, value, ctx, report) -> None:
                 job["if"] = " && ".join(conds)
             for option in set(opts) - {"type", "requires", "context", "filters", "matrix", "name"}:
                 report.unmapped.append(f"workflows.{wf_name}.{name}: {option}")
-            jobs[jid] = job
+            jobs[jid] = order_job(job)
 
         for trigger in wf.get("triggers") or []:
             sched = trigger.get("schedule") if isinstance(trigger, dict) else None

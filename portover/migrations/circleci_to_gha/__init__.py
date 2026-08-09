@@ -135,7 +135,10 @@ class CircleCiToGha(Migration):
             report.unmapped.append(f"{found[0]}: {key}")
 
         if not report.outputs and ctx.job_defs:  # no workflows: block (CircleCI 2.0)
-            workflow = {"name": "CI", "on": self.default_on(), "jobs": dict(ctx.job_defs)}
+            from portover.migrations.circleci_to_gha.mappings.workflows import order_job
+
+            workflow = {"name": "CI", "on": self.default_on(),
+                        "jobs": {jid: order_job(job) for jid, job in ctx.job_defs.items()}}
             if ctx.inputs:
                 workflow["on"]["workflow_dispatch"] = {"inputs": ctx.inputs}
             report.outputs[".github/workflows/ci.yml"] = yaml_dump(workflow) + "\n"
