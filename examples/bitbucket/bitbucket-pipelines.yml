@@ -1,0 +1,86 @@
+image: python:3.12
+
+clone:
+  depth: full
+
+options:
+  max-time: 30
+
+definitions:
+  caches:
+    sonar: ~/.sonar/cache
+  services:
+    postgres:
+      image: postgres:16
+      variables:
+        POSTGRES_PASSWORD: secret
+
+pipelines:
+  default:
+    - step:
+        name: Build
+        caches:
+          - pip
+        script:
+          - pip install -r requirements.txt
+          - python -m build
+          - echo "built $BITBUCKET_COMMIT on $BITBUCKET_BRANCH"
+        artifacts:
+          - dist/**
+    - parallel:
+        - step:
+            name: Unit tests
+            services:
+              - postgres
+            script:
+              - pytest -q
+        - step:
+            name: Lint
+            script:
+              - ruff check .
+    - step:
+        name: Publish
+        script:
+          - ./publish.sh
+        after-script:
+          - ./notify.sh
+
+  branches:
+    main:
+      - step:
+          name: Deploy
+          deployment: production
+          trigger: manual
+          oidc: true
+          max-time: 15
+          script:
+            - ./deploy.sh
+          artifacts:
+            paths:
+              - logs/**
+
+  pull-requests:
+    "**":
+      - step:
+          name: PR checks
+          script:
+            - pytest -q --maxfail=1
+
+  custom:
+    release:
+      - variables:
+          - name: version
+            default: patch
+            allowed-values:
+              - patch
+              - minor
+              - major
+      - step:
+          name: Release
+          script:
+            - ./release.sh $version
+          after-script:
+            - pipe: atlassian/slack-notify:2.0.0
+              variables:
+                WEBHOOK_URL: $SLACK_WEBHOOK
+                MESSAGE: Release finished
