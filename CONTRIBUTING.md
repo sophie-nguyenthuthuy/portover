@@ -57,5 +57,5 @@ A migration is a folder with a driver (`__init__.py`: `detect()` + `run()`,
 subclassing `portover.core.Migration`) and a `mappings/` package. Register it
 in `portover/migrations/__init__.py` (the one place a list is edited). Start by
 copying `flake8_to_ruff/` — it's the smallest — and look at an existing driver
-for the report/output conventions. Ideas wanted: Drone→GHA, TeamCity→GHA, Woodpecker→GHA,
+for the report/output conventions. Ideas wanted: Woodpecker→GHA, TeamCity→GHA, Concourse→GHA,
 setup.py→pyproject, Makefile→just, tox→nox, Dockerfile→Containerfile quirks…

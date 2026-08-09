@@ -27,6 +27,28 @@ _KEY = re.compile(r"^([A-Za-z0-9_.\-/*\"'#@+ ]+):(\s+.*|)$")
 _BLOCK_HEADER = re.compile(r"^(.*?):\s*([|>])([-+]?)\d*\s*$")
 
 
+def parse_all(text: str) -> list:
+    """Split a multi-document stream on `---` and parse each document.
+
+    Drone puts several pipelines in one .drone.yml this way; parse() alone
+    would silently merge them, with later keys overwriting earlier ones.
+    """
+    documents, current = [], []
+    for line in text.splitlines():
+        stripped = line.rstrip()
+        if stripped == "---" or stripped.startswith("--- "):
+            if any(l.strip() for l in current):
+                documents.append("\n".join(current))
+            current = []
+            continue
+        if stripped == "...":  # explicit end-of-document marker
+            continue
+        current.append(line)
+    if any(l.strip() for l in current):
+        documents.append("\n".join(current))
+    return [parse(d) for d in documents]
+
+
 def parse(text: str):
     rows = _rows(text)
     if not rows:

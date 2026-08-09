@@ -42,6 +42,7 @@ instructions, or listed as **unmapped** so you know exactly what's left.
 | `azure-pipelines-to-gha` | azure-pipelines.yml (Azure Pipelines) | .github/workflows/*.yml |
 | `bitbucket-to-gha` | bitbucket-pipelines.yml (Bitbucket) | .github/workflows/*.yml |
 | `buildkite-to-gha` | Buildkite pipeline.yml | .github/workflows/*.yml |
+| `drone-to-gha` | .drone.yml (Drone CI) | .github/workflows/*.yml |
 | `flake8-to-ruff` | .flake8 / setup.cfg | ruff.toml |
 
 Browse [docs/](docs/index.md) — one page per directive, generated from the

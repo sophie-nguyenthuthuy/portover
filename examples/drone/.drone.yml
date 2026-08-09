@@ -1,0 +1,83 @@
+kind: pipeline
+type: docker
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 50
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - pull_request
+
+services:
+  - name: database
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: secret
+
+steps:
+  - name: build
+    image: golang:1.22
+    environment:
+      GOOS: linux
+    commands:
+      - go build ./...
+      - echo "built $DRONE_COMMIT_SHA on $DRONE_BRANCH"
+
+  - name: test
+    image: golang:1.22
+    commands:
+      - go test ./...
+
+  - name: lint
+    image: golangci/golangci-lint:v1.59
+    failure: ignore
+    commands:
+      - golangci-lint run
+
+---
+kind: pipeline
+type: docker
+name: publish
+
+depends_on:
+  - default
+
+trigger:
+  event:
+    - tag
+
+steps:
+  - name: docker
+    image: plugins/docker
+    settings:
+      repo: acme/app
+      tags: latest
+      username:
+        from_secret: docker_user
+      password:
+        from_secret: docker_pass
+
+  - name: notify
+    image: plugins/slack
+    when:
+      status:
+        - success
+        - failure
+    settings:
+      webhook:
+        from_secret: slack_webhook
+
+---
+kind: secret
+name: docker_pass
+get:
+  path: secret/data/docker
+  name: password

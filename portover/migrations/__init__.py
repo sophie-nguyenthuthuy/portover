@@ -6,11 +6,12 @@ from portover.migrations.azure_pipelines_to_gha import MIGRATION as azure_pipeli
 from portover.migrations.bitbucket_to_gha import MIGRATION as bitbucket_to_gha
 from portover.migrations.buildkite_to_gha import MIGRATION as buildkite_to_gha
 from portover.migrations.circleci_to_gha import MIGRATION as circleci_to_gha
+from portover.migrations.drone_to_gha import MIGRATION as drone_to_gha
 from portover.migrations.jenkins_to_gha import MIGRATION as jenkins_to_gha
 from portover.migrations.pip_to_uv import MIGRATION as pip_to_uv
 from portover.migrations.travis_to_gha import MIGRATION as travis_to_gha
 
-REGISTRY = [pip_to_uv, jenkins_to_gha, travis_to_gha, circleci_to_gha, gitlab_ci_to_gha, azure_pipelines_to_gha, bitbucket_to_gha, buildkite_to_gha, flake8_to_ruff]
+REGISTRY = [pip_to_uv, jenkins_to_gha, travis_to_gha, circleci_to_gha, gitlab_ci_to_gha, azure_pipelines_to_gha, bitbucket_to_gha, buildkite_to_gha, drone_to_gha, flake8_to_ruff]
 
 
 def get(migration_id: str):
