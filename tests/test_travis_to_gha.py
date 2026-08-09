@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from portover.migrations import get
-from portover.migrations.travis_to_gha.miniyaml import parse
+from portover.miniyaml import parse
 
 MIG = get("travis-to-gha")
 EXAMPLE = Path(__file__).parent.parent / "examples" / "travis" / ".travis.yml"

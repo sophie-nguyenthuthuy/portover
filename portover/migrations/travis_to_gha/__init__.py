@@ -13,7 +13,7 @@ from pathlib import Path
 
 from portover.core import Migration, Report
 from portover.emit import yaml_dump
-from portover.migrations.travis_to_gha.miniyaml import MiniYamlError, parse
+from portover.miniyaml import MiniYamlError, parse
 
 # Travis phase -> (GHA step condition, order)
 PHASES = [
