@@ -39,6 +39,7 @@ instructions, or listed as **unmapped** so you know exactly what's left.
 | `travis-to-gha` | .travis.yml (Travis CI) | .github/workflows/*.yml |
 | `gitlab-ci-to-gha` | .gitlab-ci.yml (GitLab CI) | .github/workflows/*.yml |
 | `circleci-to-gha` | .circleci/config.yml (CircleCI) | .github/workflows/*.yml |
+| `azure-pipelines-to-gha` | azure-pipelines.yml (Azure Pipelines) | .github/workflows/*.yml |
 | `flake8-to-ruff` | .flake8 / setup.cfg | ruff.toml |
 
 Browse [docs/](docs/index.md) — one page per directive, generated from the

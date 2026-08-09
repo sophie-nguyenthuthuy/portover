@@ -54,7 +54,11 @@ def _rows(text: str):
         text_ = line.strip()
         m = _BLOCK_HEADER.match(text_)
         if m and not m.group(1).strip().endswith(("'", '"')):
-            body, i = _consume_block(lines, i + 1, indent, style=m.group(2), chomp=m.group(3))
+            # For a sequence item (`- key: |`) the block body must out-indent the
+            # KEY, not the dash — otherwise a sibling key of the same item gets
+            # swallowed into the scalar.
+            key_indent = indent + 2 if text_.startswith("- ") else indent
+            body, i = _consume_block(lines, i + 1, key_indent, style=m.group(2), chomp=m.group(3))
             out.append((indent, m.group(1).strip() + ":", body))
             continue
         out.append((indent, text_, None))
