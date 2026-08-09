@@ -37,6 +37,7 @@ instructions, or listed as **unmapped** so you know exactly what's left.
 | `pip-to-uv` | requirements.txt (pip) | pyproject.toml (uv) |
 | `jenkins-to-gha` | Jenkinsfile (declarative) | .github/workflows/*.yml |
 | `travis-to-gha` | .travis.yml (Travis CI) | .github/workflows/*.yml |
+| `gitlab-ci-to-gha` | .gitlab-ci.yml (GitLab CI) | .github/workflows/*.yml |
 | `circleci-to-gha` | .circleci/config.yml (CircleCI) | .github/workflows/*.yml |
 | `flake8-to-ruff` | .flake8 / setup.cfg | ruff.toml |
 

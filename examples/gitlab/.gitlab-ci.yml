@@ -1,0 +1,77 @@
+stages:
+  - build
+  - test
+  - deploy
+
+default:
+  image: python:3.12
+  before_script:
+    - pip install -r requirements.txt
+
+variables:
+  APP_ENV: ci
+  PIP_CACHE_DIR: .cache/pip
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG
+
+.python-job:
+  cache:
+    key:
+      files:
+        - requirements.txt
+    paths:
+      - .cache/pip
+  interruptible: true
+
+compile:
+  stage: build
+  extends: .python-job
+  script:
+    - python -m build
+    - echo "built $CI_COMMIT_SHA on $CI_COMMIT_BRANCH"
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+unit tests:
+  stage: test
+  extends: .python-job
+  parallel:
+    matrix:
+      - PYTHON: ["3.11", "3.12"]
+  services:
+    - postgres:16
+    - name: redis:7
+      alias: cache
+  script:
+    - pytest -q
+  artifacts:
+    reports:
+      junit: report.xml
+    when: always
+
+lint:
+  stage: test
+  extends: .python-job
+  allow_failure: true
+  script:
+    - ruff check .
+
+deploy:
+  stage: deploy
+  dependencies:
+    - compile
+  resource_group: production
+  environment:
+    name: production
+    url: https://example.com
+  timeout: 30m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - ./deploy.sh
